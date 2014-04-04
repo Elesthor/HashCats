@@ -1,6 +1,2 @@
 HashCats
-========
-
-Many Scala
-
-Saroupille !
+=======
