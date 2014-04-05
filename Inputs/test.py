@@ -10,13 +10,16 @@ def readFile(path):
     #print(intersection)
     #streets={(i, tuple(map(int, f.readline().split()))) for i in range(nstreets)}   
     #print(streets)
-    streets=[tuple() for i in range(nintersections) for j in range(nintersections)]
-    for line in f.readlines():
+    #streets=[tuple() for i in range(nintersections) for j in range(nintersections)]
+    streets=list()
+    print(streets)
+    for line in f:
+        print(line)
         
-        a=list(map(int, line.split()))
-        print(a)
-        streets2[a[0]][a[1]]=tuple(a)
-    print(streets2)
+        #a=list(map(int, line.split()))
+        #print(a)
+        #streets[a[0]][a[1]]=tuple(a)
+    print(streets)
         
 #def writeFile:
     

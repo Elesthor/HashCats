@@ -34,6 +34,49 @@ let input file_name =
 	done;
 	glob_graph := mat
 
+let output l out = 
+	let result = open_out out in 
+	Printf.fprintf result "%i\n" data.flotte;
+	let rec output_aux l' acc = 
+		match l' with
+		|[] -> ()
+		|t::q -> Printf.fprintf result "%i\n" acc; List.iter (Printf.fprintf result "%i\n") t; output_aux q (acc+1)
+	in 
+	output_aux l 1
+
+let l_accessibles s t_left = 
+	let res = ref [] in 
+	for i = 0 to (data.inters - 1) do 
+		if !glob_graph.(s).(i).cout <> -1 && !glob_graph.(s).(i).cout <= t_left then 
+			res := i::!res
+	done;
+	Array.of_list !res
+
+let l_random () = 
+	let rec random_aux time_left s = 
+		let tab = l_accessibles s time_left in 
+		let n = Array.length tab in 
+		print_int time_left;
+		print_endline "";
+		if n = 0 then
+			[s]
+		else begin
+			let r = Random.int n in 
+			let t' = time_left - !glob_graph.(s).(tab.(r)).cout in 
+			s :: (random_aux t' tab.(r))
+		end
+	in 
+	List.rev (random_aux data.temps data.depart)
+		
+let random_total () = 
+	let l = ref [] in 
+	for i = 0 to data.flotte -1 do 
+		l := l_random () :: !l 
+	done;
+	output !l "result.txt"
+
 
 let () = 
-	input "paris_54000.txt"
+	Random.self_init ();
+	input "paris_54000.txt";
+	random_total ()
