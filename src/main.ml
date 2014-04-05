@@ -37,12 +37,14 @@ let input file_name =
 let output l out = 
 	let result = open_out out in 
 	Printf.fprintf result "%i\n" data.flotte;
-	let rec output_aux l' acc = 
+	let rec output_aux l' = 
 		match l' with
 		|[] -> ()
-		|t::q -> Printf.fprintf result "%i\n" acc; List.iter (Printf.fprintf result "%i\n") t; output_aux q (acc+1)
+		|t::q -> Printf.fprintf result "%i\n" (List.length t); 
+				 List.iter (Printf.fprintf result "%i\n") t; 
+				 output_aux q 
 	in 
-	output_aux l 1
+	output_aux l
 
 let l_accessibles s t_left = 
 	let res = ref [] in 
@@ -66,7 +68,7 @@ let l_random () =
 			s :: (random_aux t' tab.(r))
 		end
 	in 
-	List.rev (random_aux data.temps data.depart)
+	random_aux data.temps data.depart
 		
 let random_total () = 
 	let l = ref [] in 
