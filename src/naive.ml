@@ -15,7 +15,7 @@ let input file_name =
 		data.temps <- temps;
 		data.flotte <- flotte;
 		data.depart <- depart;
-	let mat = Array.make_matrix inters inters {cout = -1; long = -1} in 
+	let mat = Array.make_matrix inters inters (-1,-1) in 
 	for i = 0 to data.inters -1 do 
 		let line = input_line file in 
 		ignore (line)
@@ -24,15 +24,11 @@ let input file_name =
 		let line = input_line file in  
 		let (inter1, inter2, sens, cout, long) = Scanf.sscanf line "%d %d %d %d %d" (fun x y z t u -> (x,y,z,t,u)) in
 		if sens = 2 then begin
-			mat.(inter1).(inter2).cout <- cout;
-			mat.(inter1).(inter2).long <- long;
-			mat.(inter2).(inter1).cout <- cout;
-			mat.(inter2).(inter1).long <- long
+			mat.(inter1).(inter2) <- (cout, long);
+			mat.(inter2).(inter1) <- (cout, long)
 		end
-		else begin
-			mat.(inter1).(inter2).cout <- cout;
-			mat.(inter1).(inter2).long <- long
-		end
+		else
+			mat.(inter1).(inter2) <- (cout, long)
 	done;
 	glob_graph := mat
 
@@ -44,8 +40,8 @@ let naive k marque =
 	let find_road i =
 		let rec aux j =
 			if j = data.rues then None
-			else if (not marque.(i).(j)) || m.(i).(j).cout <> -1 then begin
-				if !temps_restant >= m.(i).(j).cout then begin
+			else if (not marque.(i).(j)) || (fst m.(i).(j)) <> -1 then begin
+				if !temps_restant >= (fst m.(i).(j)) then begin
 					Some(j)
 				end
 				else aux (j+1)
