@@ -13,7 +13,7 @@ let input file_name =
 		data.temps <- temps;
 		data.flotte <- flotte;
 		data.depart <- depart;
-	let mat = Array.make_matrix inters inters {cout = -1; long = -1} in 
+	let mat = Array.make_matrix inters inters (-1,-1) in 
 	for i = 0 to data.inters -1 do 
 		let line = input_line file in 
 		ignore (line)
@@ -22,15 +22,11 @@ let input file_name =
 		let line = input_line file in  
 		let (inter1, inter2, sens, cout, long) = Scanf.sscanf line "%d %d %d %d %d" (fun x y z t u -> (x,y,z,t,u)) in
 		if sens = 2 then begin
-			mat.(inter1).(inter2).cout <- cout;
-			mat.(inter1).(inter2).long <- long;
-			mat.(inter2).(inter1).cout <- cout;
-			mat.(inter2).(inter1).long <- long
+			mat.(inter1).(inter2) <- (cout, long);
+			mat.(inter2).(inter1) <- (cout, long)
 		end
-		else begin
-			mat.(inter1).(inter2).cout <- cout;
-			mat.(inter1).(inter2).long <- long
-		end
+		else
+			mat.(inter1).(inter2) <- (cout, long)
 	done;
 	glob_graph := mat
 
@@ -49,7 +45,7 @@ let output l out =
 let l_accessibles s t_left = 
 	let res = ref [] in 
 	for i = 0 to (data.inters - 1) do 
-		if !glob_graph.(s).(i).cout <> -1 && !glob_graph.(s).(i).cout <= t_left then 
+		if (fst !glob_graph.(s).(i)) <> -1 && (fst !glob_graph.(s).(i)) <= t_left then 
 			res := i::!res
 	done;
 	Array.of_list !res
@@ -64,7 +60,7 @@ let l_random () =
 			[s]
 		else begin
 			let r = Random.int n in 
-			let t' = time_left - !glob_graph.(s).(tab.(r)).cout in 
+			let t' = time_left - (fst !glob_graph.(s).(tab.(r))) in 
 			s :: (random_aux t' tab.(r))
 		end
 	in 
