@@ -1,3 +1,5 @@
+(* Algo naif *)
+
 type mapdata = {mutable inters : int; mutable rues : int; mutable temps : int; mutable flotte : int; mutable depart : int}
 type streetdata = {mutable cout : int; mutable long : int}
 
@@ -30,51 +32,43 @@ let input file_name =
 	done;
 	glob_graph := mat
 
-let output l out = 
-	let result = open_out out in 
-	Printf.fprintf result "%i\n" data.flotte;
-	let rec output_aux l' = 
-		match l' with
-		|[] -> ()
-		|t::q -> Printf.fprintf result "%i\n" (List.length t); 
-				 List.iter (Printf.fprintf result "%i\n") t; 
-				 output_aux q 
-	in 
-	output_aux l
-
-let l_accessibles s t_left = 
-	let res = ref [] in 
-	for i = 0 to (data.inters - 1) do 
-		if (fst !glob_graph.(s).(i)) <> -1 && (fst !glob_graph.(s).(i)) <= t_left then 
-			res := i::!res
+(* Pour la voiture k *)
+let naive k marque =
+	let m = !glob_graph in
+	let temps_restant = ref data.temps in
+	let etapes = ref [data.depart] in
+	let find_road i =
+		let rec aux j =
+			if j = data.rues then None
+			else if (not marque.(i).(j)) || (fst m.(i).(j)) <> -1 then begin
+				if !temps_restant >= (fst m.(i).(j)) then begin
+					Some(j)
+				end
+				else aux (j+1)
+			end
+			else aux (j+1)
+		in aux 0
+	in
+	let i = ref data.depart in
+	let j = ref (find_road (!i)) in
+	while !j <> None do
+		match !j with
+		| Some(j') ->
+			begin
+				etapes := j' :: (!etapes);
+				marque.(!i).(j') <- true;
+				i := j';
+				j := find_road (!i)
+			end
+		| _ -> failwith "Merde"
 	done;
-	Array.of_list !res
-
-let l_random () = 
-	let rec random_aux time_left s = 
-		let tab = l_accessibles s time_left in 
-		let n = Array.length tab in 
-		print_int time_left;
-		print_endline "";
-		if n = 0 then
-			[s]
-		else begin
-			let r = Random.int n in 
-			let t' = time_left - (fst !glob_graph.(s).(tab.(r))) in 
-			s :: (random_aux t' tab.(r))
-		end
-	in 
-	random_aux data.temps data.depart
-		
-let random_total () = 
-	let l = ref [] in 
-	for i = 0 to data.flotte -1 do 
-		l := l_random () :: !l 
-	done;
-	output !l "result.txt"
+	Printf.printf "%i\n" (List.length !etapes);
+	List.iter (fun i -> Printf.printf "%i\n" i) !etapes
 
 
 let () = 
-	Random.self_init ();
 	input "paris_54000.txt";
-	random_total ()
+	let marque = Array.make_matrix data.rues data.rues false in
+	for k = 0 to 7 do
+		naive k marque
+	done
